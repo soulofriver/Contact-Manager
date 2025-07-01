@@ -1,0 +1,93 @@
+import tkinter as tk 
+from tkinter import messagebox  
+
+contacts = {}
+
+def add_contact():
+    name = name_entry.get().strip()
+    phone = phone_entry.get().strip()
+
+    if not name or not phone:
+        messagebox.showwarning("Error", "Please enter name and phone number")
+        return
+    if name in contacts:
+        messagebox.showinfo("Replace", "This contact already exists")
+    else:
+        contacts[name] = phone
+        update_listbox()
+        clear_fields()
+        messagebox.showinfo("Successful", "Contact has been added")
+
+def delete_contact():
+    selected = contact_listbox.curselection()
+    if not selected:
+        messagebox.showwarning("Error", "Please select a contact")
+        return
+    name = contact_listbox.get(selected)
+    if name in contacts:
+        del contacts[name]
+        update_listbox()
+        clear_fields()
+        messagebox.showinfo("Deleted", f"{name} deleted successfully")
+
+def edit_contact():
+    selected = contact_listbox.curselection()
+    if not selected:
+        messagebox.showwarning("Error", "Please select a contact")
+        return
+    
+    old_name = contact_listbox.get(selected)
+    new_name = name_entry.get().strip()
+    new_phone = phone_entry.get().strip()
+    if not new_name or not new_phone:
+        messagebox.showwarning("Error", "Name and phone number must be filled")
+        return
+    del contacts[old_name]
+    contacts[new_name] = new_phone
+    update_listbox()
+    clear_fields()
+    messagebox.showinfo("Edited", "Contact edited successfully")
+
+def update_listbox():
+    contact_listbox.delete(0, tk.END)
+    for name in contacts:
+        contact_listbox.insert(tk.END, name)
+
+def on_select(event):
+    selected = contact_listbox.curselection()
+    if selected:
+        name = contact_listbox.get(selected)
+        phone = contacts.get(name, "")
+        name_entry.delete(0, tk.END)
+        name_entry.insert(0, name)
+        phone_entry.delete(0, tk.END)
+        phone_entry.insert(0, phone)
+
+def clear_fields():
+    name_entry.delete(0, tk.END)
+    phone_entry.delete(0, tk.END)
+
+# GUI
+root = tk.Tk()
+root.title("Contacts List")
+root.geometry("400x400")
+root.resizable(False, False)
+
+tk.Label(root, text="Contact name").pack()
+name_entry = tk.Entry(root)
+name_entry.pack()
+
+tk.Label(root, text="Phone number").pack()
+phone_entry = tk.Entry(root)
+phone_entry.pack()
+
+tk.Button(root, text="Add", command=add_contact, width=15).pack(pady=5)
+tk.Button(root, text="Edit", command=edit_contact, width=15).pack(pady=5)
+tk.Button(root, text="Delete", command=delete_contact, width=15).pack(pady=5)
+
+tk.Label(root, text="Contacts").pack()
+contact_listbox = tk.Listbox(root, width=40)
+contact_listbox.pack(pady=10)
+contact_listbox.bind("<<ListboxSelect>>", on_select)
+
+root.mainloop()
